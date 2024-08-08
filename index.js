@@ -86,9 +86,13 @@ const requestsTemplate = [
 async function executeRequests(codUser) {
   let idUser;
   let idGroup;
-  for (const request of requestsTemplate) {
+  let requestFailed = false;
+
+  for (let i = 0; i < requestsTemplate.length; i++) {
+    const request = requestsTemplate[i];
     const currentRequest = { ...request };
     console.log(`Executing ${currentRequest.name} for codUser ${codUser}...`);
+
     switch (request.name) {
       case 'addUser':
         currentRequest.data.username = `${codUser}@`;
@@ -108,6 +112,7 @@ async function executeRequests(codUser) {
       default:
         break;
     }
+
     try {
       const response = await makeRequest(
         currentRequest.method,
@@ -115,39 +120,77 @@ async function executeRequests(codUser) {
         token,
         currentRequest.data,
       );
+
       if (currentRequest.name === 'findUser') {
         idUser = response.find(
           (user) => user.username.toLowerCase() === `${codUser.toLowerCase()}@`,
         ).id;
+        
       }
+
       if (currentRequest.name === 'getIdGroup') {
         idGroup = response.find((group) => group.name === 'UTP Estudiantes').id;
       }
+
       console.log(`${currentRequest.name} succeeded for codUser ${codUser}...`);
+      requestFailed = false;
     } catch (error) {
       console.error(`${currentRequest.name} failed for codUser ${codUser}:`, error.message);
-      break;
+      if (currentRequest.name === 'addUser') {
+        const findUser = requestsTemplate.find((request) => request.name === 'findUser');
+        const newFindUser = { ...findUser };
+        newFindUser.url = `${newFindUser.url}${codUser}`;
+        const response = await makeRequest(newFindUser.method, newFindUser.url, token, newFindUser.data);
+        const id = response.find(
+          (user) => user.username.toLowerCase() === `${codUser.toLowerCase()}@`,
+        ).id;
+        await deleteItem(id, codUser);
+        requestFailed = true;
+      }
+    }
+
+    if (requestFailed) {
+      console.log(`Retrying ${currentRequest.name} for codUser ${codUser}...`);
+      i--;
     }
   }
 }
 
-async function processCSV() {
-  const requests = [];
-
-  fs.createReadStream('users.csv')
-    .pipe(csv())
-    .on('data', (row) => {
-      const codUser = row.codUser;
-      requests.push(executeRequests(codUser));
-    })
-    .on('end', async () => {
-      try {
-        await Promise.all(requests);
-        console.log('CSV file successfully processed.');
-      } catch (error) {
-        console.error('Error processing CSV file:', error);
-      }
-    });
+async function deleteItem(id, codUser) {
+  try {
+    await makeRequest(
+      'DELETE',
+      `${variables.url}/auth/admin/realms/${variables.realm}/users/${id}`,
+      token,
+    );
+    console.log(`User ${codUser} deleted...`);
+  } catch (error) {
+    console.error(`Error deleting user ${codUser}:`, error.message);
+  }
 }
 
-processCSV();
+const processRow = async (row) => {
+  const codUser = row.codUser;
+  await executeRequests(codUser);
+};
+
+const processCsv = () => {
+  const rows = [];
+
+  return new Promise((resolve, reject) => {
+    fs.createReadStream('users.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        rows.push(row);
+      })
+      .on('end', async () => {
+        for (const row of rows) {
+          await processRow(row);
+        }
+        resolve();
+      })
+      .on('error', reject);
+  });
+};
+
+processCsv();
