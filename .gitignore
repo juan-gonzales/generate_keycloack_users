@@ -1,0 +1,127 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+logs/*.log
+
+# Dependency directories
+jspm_packages/
+web_modules/
+
+# Build directories
+dist/
+dist-ssr/
+.out/
+.output/
+build/
+
+# Production
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Misc
+.DS_Store
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# Firebase
+.firebase/
+
+# macOS
+*.DS_Store
+
+# Editor directories and files
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+.history/
+*.history/
+.project/
+.classpath/
+.cache/
+
+# Other files
+*.diff
+*.patch
+*.crt
+*.pem
+*.key
+*.csv
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# TypeScript
+*.tsbuildinfo
+
+# Husky
+.husky/
+
+# Bower
+bower_components/
+.bowerrc
+
+# Miscellaneous
+.tmp/
+temp/
+
+# Sentry
+.sentryclirc
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Nyc test coverage
+.nyc_output/
+
+# Parcel cache
+.cache/
+
+# Next.js build output
+.next/
+
+# Nuxt.js build output
+.nuxt/
+
+# Rollup cache
+.rpt2_cache/
+
+# TSLint
+tslint.tsbuildinfo
+
+# Storybook
+out/
+.storybook/
+
+# TypeScript v1 declaration files
+typings/
+
+# Custom file patterns
+public/static/
